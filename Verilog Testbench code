@@ -1,0 +1,67 @@
+`timescale 1ns/1ps
+`include "sequence_detector.v"
+
+
+module sequence_detector_tb;
+
+  reg clock;
+  reg rst;
+  reg in_bit;
+  wire detected;
+
+  sequence_detector dut (
+    .clock(clock),
+    .rst(rst),
+    .in_bit(in_bit),
+    .detected(detected)
+  );
+
+  always #5 clock = ~clock;
+
+  initial begin
+	$fsdbDumpvars();
+    clock = 0;
+    rst = 1;
+    in_bit = 0;
+
+    #10;
+    rst = 0;
+
+    #20; in_bit = 1;
+    #10;
+
+    #20; in_bit = 1;
+    #10;
+
+    #20; in_bit = 0;
+    #10;
+
+    if (detected == 1) begin
+      $display("Test Passed: '110' sequence detected.");
+    end else begin
+      $display("Test Failed: '110' sequence NOT detected.");
+      $finish;
+    end
+
+    #20; in_bit = 1;
+    #10;
+
+    #20; in_bit = 0;
+    #10;
+
+    #20; in_bit = 1;
+    #10;
+
+    if (detected == 0) begin
+      $display("Test Passed: No false detection.");
+    end else begin
+      $display("Test Failed: False detection.");
+      $finish;
+    end
+
+    #20;
+    $display("Simulation complete.");
+    $finish;
+  end
+
+endmodule
